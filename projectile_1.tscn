@@ -1,0 +1,134 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://assets/projectile_shape_1.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/tex_1.png" type="Texture" id=2]
+[ext_resource path="res://addons/Trail/trail_3d.gd" type="Script" id=3]
+[ext_resource path="res://assets/glow.png" type="Texture" id=4]
+[ext_resource path="res://assets/flow_trail.png" type="Texture" id=5]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+
+var time := 0.0
+
+func _ready():
+	pass # Replace with function body.
+
+
+func _process(delta):
+	time += delta
+	$shape.material_override.set_shader_param('time', time)
+"
+
+[sub_resource type="Shader" id=2]
+code = "shader_type spatial;
+
+uniform vec4 color : hint_color = vec4(1.0);
+uniform float speed = -1.0;
+uniform float time = 0.0;
+uniform sampler2D base: hint_albedo;
+
+varying vec2 uv;
+void vertex(){
+	uv = vec2(UV.x+time*speed, UV.y);
+}
+
+void fragment(){
+	float a = texture(base, uv).a;
+	
+	EMISSION = color.rgb*2.0;
+	ALPHA = clamp(a * color.a * 1.5 - 0.3, 0.0, 1.0);
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 2 )
+shader_param/color = Color( 0, 0.505882, 1, 1 )
+shader_param/speed = -1.0
+shader_param/time = 0.0
+shader_param/base = ExtResource( 2 )
+
+[sub_resource type="SpatialMaterial" id=4]
+params_blend_mode = 1
+params_billboard_mode = 1
+
+[sub_resource type="Shader" id=5]
+code = "shader_type spatial;
+
+//render_mode unshaded;
+
+uniform vec4 color : hint_color = vec4(1.0);
+uniform sampler2D flow_texture :hint_albedo;
+uniform float flow_strength = 1.0;
+uniform float flow_speed = 1.0;
+uniform float dark_edge = 1.0;
+uniform float trail_offset_speed = 1.0;
+uniform float dissolve_flow_speed = 1.0;
+
+
+void fragment(){
+	vec4 _color = COLOR*color;
+	float edge_mask = clamp(UV.y*(1.0-UV.y)*4.0, 0.0, 1.0);
+
+	/// Tail
+//	vec2 uv_tail_offset = UV + vec2(flow_speed*TIME, 0.0);
+//	vec2 tail_distortion = (texture(flow_texture, uv_tail_offset).rg-vec2(0.5))*2.0*flow_strength*(1.0-UV.x);
+//	uv_tail_offset = UV + tail_distortion + vec2(TIME * trail_offset_speed, 0);
+//	float t = texture(flow_texture, uv_tail_offset).b;
+
+	/// Dissolve
+	vec2 uv_d = UV + vec2(dissolve_flow_speed*TIME, 0);
+	float d = texture(flow_texture, uv_d).g + 2.0 * UV.x - 1.0;
+	d = clamp(d*2.0-1.0, 0.0, 1.0);
+//
+//	float tail = t * d * edge_mask;
+
+//	ALBEDO = vec3(tail);
+	ALBEDO = vec3(0.0);
+	EMISSION = COLOR.rgb * d * edge_mask;
+//	EMISSION = _color.rgb * clamp(tail+edge_mask, 0, 1);
+//	ALPHA = _color.a*tail;
+	ALPHA = _color.a*d;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/color = Color( 1, 1, 1, 1 )
+shader_param/flow_strength = 1.0
+shader_param/flow_speed = 1.0
+shader_param/dark_edge = 1.0
+shader_param/trail_offset_speed = 1.0
+shader_param/dissolve_flow_speed = 1.0
+shader_param/flow_texture = ExtResource( 5 )
+
+[sub_resource type="Curve" id=7]
+_data = [ Vector2( 0, 0.157084 ), 0.0, 4.82292, 0, 0, Vector2( 0.374581, 1 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="Gradient" id=8]
+offsets = PoolRealArray( 0, 0.210046, 0.56621, 1 )
+colors = PoolColorArray( 0.691406, 0.691406, 0.691406, 1, 0, 0.305511, 0.832031, 1, 0.996094, 0.962288, 0.602714, 1, 0.992188, 0.986368, 0.980173, 0 )
+
+[node name="projectile" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="shape" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.752557 )
+material_override = SubResource( 3 )
+mesh = ExtResource( 1 )
+material/0 = null
+
+[node name="glow" type="Sprite3D" parent="."]
+material_override = SubResource( 4 )
+pixel_size = 0.03
+texture = ExtResource( 4 )
+
+[node name="trail" type="ImmediateGeometry" parent="."]
+material_override = SubResource( 6 )
+script = ExtResource( 3 )
+distance = 0.5
+segments = 25
+lifetime = 2.0
+base_width = 1.9
+width_profile = SubResource( 7 )
+color_gradient = SubResource( 8 )

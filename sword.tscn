@@ -1,0 +1,80 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://assets/sword.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://addons/Trail/trail_3d.gd" type="Script" id=2]
+[ext_resource path="res://assets/swoosh.png" type="Texture" id=3]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.156863, 0.156863, 0.243137, 1 )
+metallic = 0.9
+roughness = 0.3
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0, 0, 0, 1 )
+emission_enabled = true
+emission = Color( 1, 0.211765, 0, 1 )
+emission_energy = 5.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="Shader" id=3]
+code = "shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_toon,specular_disabled,shadows_disabled,ambient_light_disabled;
+uniform vec4 albedo : hint_color = vec4(1.0);
+uniform sampler2D texture_emission : hint_albedo;
+uniform float emission_energy = 1.0;
+
+
+void vertex() {
+	if (!OUTPUT_IS_SRGB) {
+		COLOR.rgb = mix( pow((COLOR.rgb + vec3(0.055)) * (1.0 / (1.0 + 0.055)), vec3(2.4)), COLOR.rgb* (1.0 / 12.92), lessThan(COLOR.rgb,vec3(0.04045)) );
+	}
+}
+
+
+void fragment() {
+	ALBEDO = albedo.rgb;
+	vec3 emission_tex = texture(texture_emission, UV).rgb;
+//	EMISSION = emission_tex * emission_energy * COLOR.rgb;
+	EMISSION = emission_energy * COLOR.rgb;
+//	ALPHA = emission_tex.r * COLOR.a * albedo.a;
+	ALPHA = emission_tex.r*COLOR.a;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+shader_param/albedo = Color( 0, 0, 0, 1 )
+shader_param/emission_energy = 3.0
+shader_param/texture_emission = ExtResource( 3 )
+
+[sub_resource type="Curve" id=5]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), -2.85721, 0.0, 0, 0 ]
+
+[sub_resource type="Gradient" id=6]
+offsets = PoolRealArray( 0, 0.881279, 1 )
+colors = PoolColorArray( 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0 )
+
+[node name="sword" type="MeshInstance"]
+mesh = ExtResource( 1 )
+material/0 = SubResource( 1 )
+material/1 = SubResource( 2 )
+
+[node name="target_position" type="Position3D" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0 )
+
+[node name="trail" type="ImmediateGeometry" parent="target_position"]
+material_override = SubResource( 4 )
+script = ExtResource( 2 )
+distance = 0.001
+lifetime = 0.8
+base_width = 1.2
+width_profile = SubResource( 5 )
+color_gradient = SubResource( 6 )
+smoothing_iterations = 2
+alignment = "Normal"
+
+[node name="OmniLight" type="OmniLight" parent="target_position"]
+light_energy = 3.0
+omni_range = 1.0
+omni_attenuation = 0.31864

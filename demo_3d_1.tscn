@@ -1,0 +1,118 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://projectile_1.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/flow_trail.png" type="Texture" id=2]
+[ext_resource path="res://assets/NotoSansUI_Regular.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+
+var speed := 1.0
+func _ready():
+	pass
+	
+	
+func _process(delta):
+	$rot.rotate_y(speed*delta)
+
+
+func _on_back_btn_button_down():
+	get_tree().change_scene(\"res://Menu.tscn\")
+"
+
+[sub_resource type="DynamicFont" id=5]
+size = 18
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="Shader" id=2]
+code = "shader_type spatial;
+
+render_mode unshaded;
+
+uniform vec4 color : hint_color = vec4(1.0);
+uniform sampler2D flow_texture :hint_albedo;
+uniform float flow_strength = 1.0;
+uniform float flow_speed = 1.0;
+uniform float dark_edge = 1.0;
+uniform float trail_offset_speed = 1.0;
+uniform float dissolve_flow_speed = 1.0;
+
+
+void fragment(){
+	vec4 _color = COLOR*color;
+	float edge_mask = clamp(UV.y*(1.0-UV.y)*4.0, 0.0, 1.0);
+
+	/// Tail
+	vec2 uv_tail_offset = UV + vec2(flow_speed*TIME, 0.0);
+	vec2 tail_distortion = (texture(flow_texture, uv_tail_offset).rg-vec2(0.5))*2.0*flow_strength*(1.0-UV.x);
+	uv_tail_offset = UV + tail_distortion + vec2(TIME * trail_offset_speed, 0);
+	float t = texture(flow_texture, uv_tail_offset).b;
+
+	/// Dissolve
+	vec2 uv_d = UV + vec2(dissolve_flow_speed*TIME, 0);
+	float d = texture(flow_texture, uv_d).g + 2.0 * UV.x - 1.0;
+	d = clamp(d, 0.0, 1.0);
+
+	float tail = t * d * edge_mask;
+//	ALBEDO = vec3(tail);
+	EMISSION = _color.rgb * clamp(tail+edge_mask, 0, 1);
+	ALPHA = _color.a*tail;
+//	a
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 2 )
+shader_param/color = Color( 1, 1, 1, 1 )
+shader_param/flow_strength = 0.4
+shader_param/flow_speed = 1.0
+shader_param/dark_edge = 1.0
+shader_param/trail_offset_speed = 1.2
+shader_param/dissolve_flow_speed = 0.8
+shader_param/flow_texture = ExtResource( 2 )
+
+[sub_resource type="QuadMesh" id=4]
+size = Vector2( 4, 1 )
+
+[node name="root" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="ui" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="back_btn" type="Button" parent="ui"]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 144.0
+margin_bottom = 52.0
+custom_fonts/font = SubResource( 5 )
+text = "<- Back"
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="rot" type="Spatial" parent="."]
+
+[node name="projectile" parent="rot" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0 )
+
+[node name="projectile2" parent="rot" instance=ExtResource( 1 )]
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, -10, 0, 0 )
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 0.707107, 0.298836, -0.640856, 0, 0.906308, 0.422618, 0.707107, -0.298836, 0.640856, -15, 10, 15 )
+
+[node name="MeshInstance" type="MeshInstance" parent="Camera"]
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 1.49012e-07, 1, 0, 1.90735e-06, -2.72972 )
+visible = false
+material_override = SubResource( 3 )
+mesh = SubResource( 4 )
+material/0 = null
+[connection signal="button_down" from="ui/back_btn" to="." method="_on_back_btn_button_down"]

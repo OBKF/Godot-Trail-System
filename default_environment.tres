@@ -1,0 +1,12 @@
+[gd_resource type="Environment" load_steps=2 format=2]
+
+[sub_resource type="ProceduralSky" id=1]
+sun_longitude = 180.0
+
+[resource]
+background_mode = 2
+background_sky = SubResource( 1 )
+glow_enabled = true
+glow_blend_mode = 1
+glow_hdr_threshold = 1.3
+glow_bicubic_upscale = true

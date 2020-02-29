@@ -1,0 +1,120 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://character.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/checker_roughness.png" type="Texture" id=2]
+[ext_resource path="res://assets/checker.png" type="Texture" id=3]
+[ext_resource path="res://assets/checker_normal.png" type="Texture" id=4]
+[ext_resource path="res://assets/NotoSansUI_Regular.ttf" type="DynamicFontData" id=5]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+
+var ap :AnimationPlayer
+
+
+func _ready():
+	ap = $character/AnimationPlayer
+	ap.play(\"TPos\")
+	
+	$sun.shadow_enabled = true
+	
+
+
+func _on_SpinBox_item_selected(id):
+	if id == 1:
+		ap.playback_speed = 1
+		$character/character/Skeleton/sword/sword.visible = true
+		$character/character/Skeleton/foot_r/trail.visible = false
+		$character/character/Skeleton/foot_l/trail.visible = false
+		ap.play(\"Sword_loop\")
+	elif id == 2:
+		ap.playback_speed = 1
+		$character/character/Skeleton/sword/sword.visible = false
+		$character/character/Skeleton/foot_r/trail.visible = true
+		$character/character/Skeleton/foot_l/trail.visible = true
+		ap.play(\"Capoeira_Flair_loop\")
+	else:
+		ap.playback_speed = 1
+		$character/character/Skeleton/sword/sword.visible = false
+		$character/character/Skeleton/foot_r/trail.visible = false
+		$character/character/Skeleton/foot_l/trail.visible = false
+		ap.play(\"TPos\")
+		
+
+
+func _on_back_btn_button_down():
+	get_tree().change_scene(\"res://Menu.tscn\")
+"
+
+[sub_resource type="DynamicFont" id=4]
+size = 18
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 5 )
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_texture = ExtResource( 3 )
+roughness = 0.9
+roughness_texture = ExtResource( 2 )
+normal_enabled = true
+normal_scale = 1.0
+normal_texture = ExtResource( 4 )
+uv1_triplanar = true
+
+[sub_resource type="PlaneMesh" id=3]
+size = Vector2( 100, 100 )
+
+[node name="root" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="ui" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="back_btn" type="Button" parent="ui"]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 144.0
+margin_bottom = 52.0
+custom_fonts/font = SubResource( 4 )
+text = "<- Back"
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="gnd" type="MeshInstance" parent="."]
+material_override = SubResource( 2 )
+mesh = SubResource( 3 )
+material/0 = null
+
+[node name="character" parent="." instance=ExtResource( 1 )]
+
+[node name="SpinBox" type="OptionButton" parent="."]
+margin_left = 20.0
+margin_top = 100.0
+margin_right = 74.0
+margin_bottom = 24.0
+text = "T-Pos"
+items = [ "T-Pos", null, false, 0, null, "Sword", null, false, 1, null, "Capoeira Flair", null, false, 2, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sun" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, 0, 0, 0 )
+light_energy = 5.0
+directional_shadow_mode = 0
+directional_shadow_depth_range = 1
+directional_shadow_max_distance = 32.0
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 0.707107, 0.353553, -0.612372, 0, 0.866025, 0.5, 0.707107, -0.353553, 0.612372, -1.80367, 2.46431, 3.0144 )
+visible = false
+[connection signal="button_down" from="ui/back_btn" to="." method="_on_back_btn_button_down"]
+[connection signal="item_selected" from="SpinBox" to="." method="_on_SpinBox_item_selected"]
