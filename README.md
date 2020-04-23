@@ -3,7 +3,7 @@
 # Godot Trail System
 Advanced 2D/3D Trail system.
 
-[![GitHub issues](https://img.shields.io/github/issues/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/issues) [![GitHub forks](https://img.shields.io/github/forks/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/network) [![GitHub stars](https://img.shields.io/github/stars/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/stargazers) [![GitHub license](https://img.shields.io/github/license/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/blob/master/LICENSE) [![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FOBKF_Design)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2FOBKF%2FGodot-Trail-System)
+[![GitHub issues](https://img.shields.io/github/issues/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/issues) [![GitHub forks](https://img.shields.io/github/forks/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/network) [![GitHub stars](https://img.shields.io/github/stars/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/stargazers) [![GitHub license](https://img.shields.io/github/license/OBKF/Godot-Trail-System)](https://github.com/OBKF/Godot-Trail-System/blob/master/LICENSE) [![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FOBKF_)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2FOBKF%2FGodot-Trail-System)
 
 ![](godot_trail.png)
 
@@ -69,5 +69,5 @@ Example from [3D Navigation Mesh demo](navmesh.gd)
 [![See it in action](https://img.youtube.com/vi/cqkCt9XIBA0/0.jpg)](https://youtu.be/cqkCt9XIBA0)
 
 ### Contact
-- [Twitter](https://twitter.com/OBKF_Design/)
+- [Twitter](https://twitter.com/OBKF_/)
 
