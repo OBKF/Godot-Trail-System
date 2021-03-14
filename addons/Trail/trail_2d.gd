@@ -19,7 +19,6 @@ var target
 var trail_points := []
 var offset := Vector2()
 
-
 class Point:
 	var position := Vector2()
 	var age       := 0.0
@@ -43,7 +42,8 @@ func _ready():
 	position = Vector2()
 
 func _emit():
-	var _position :Vector2 = target.global_transform.origin + offset
+	var _rotated_offset :Vector2 = offset.rotated(target.rotation)
+	var _position :Vector2 = target.global_transform.origin + _rotated_offset
 	var point = Point.new(_position, lifetime)
 	
 	if trail_points.size() < 1:
